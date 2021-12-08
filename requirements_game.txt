@@ -1,8 +1,8 @@
--codigo de pong ponerlo como spaceinvaders
+-change code ping pong by the spaceinvaders
+
+-inser a background 
+-insert a image for the ships
+-The ship have to have a sprite 
 
 
--la nave debe cambiar de sprite
-
-
--la nave puede dar disparos simultaneos
--intro del juego con menu
+-the ship can to shot multiple times
