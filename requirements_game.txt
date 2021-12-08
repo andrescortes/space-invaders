@@ -1,0 +1,8 @@
+-codigo de pong ponerlo como spaceinvaders
+
+
+-la nave debe cambiar de sprite
+
+
+-la nave puede dar disparos simultaneos
+-intro del juego con menu
