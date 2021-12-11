@@ -35,7 +35,8 @@ def game():
     # font
     health_font = pygame.font.SysFont('comicsans', 40)
     winner_font = pygame.font.SysFont('comicsans', 100)
-
+    
+    winner_font = pygame.font.SysFont('comicsans', 100)
     # health
     red_health = 10
     yellow_health = 10
