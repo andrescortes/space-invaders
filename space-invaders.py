@@ -12,6 +12,8 @@ def game():
     # Colores
     colour_black = (0, 0, 0)
     colour_white = (255, 255, 255)
+    colour_red = (255, 0, 0)
+    colour_yellow = (255, 255, 0)
 
     # vars
     window_width = 800
@@ -47,6 +49,13 @@ def game():
     bullet_speed = 7
     max_bullet = 3
     ship_width, ship_height = 90, 70
+    # user event
+    yellow_hit = pygame.USEREVENT + 1
+    red_hit = pygame.USEREVENT + 2
+
+    # bullets
+    red_bullets = []
+    yellow_bullets = []
 
     # load background image
     backgroung_space = pygame.transform.scale(pygame.image.load(
@@ -92,7 +101,6 @@ def game():
 
             # tecla presionada
             if event.type == pygame.KEYDOWN:
-
                 # ------------Jugador 1-------------------
                 if event.key == pygame.K_w:
                     player1_speed_Y = -3
@@ -106,6 +114,11 @@ def game():
                 if event.key == pygame.K_d:
                     player1_speed_X = 3
                     flag_player_1 = 4
+                if event.key == pygame.K_LCTRL and len(yellow_bullets) < max_bullet:
+                    bullet = pygame.Rect(player_1_rect.x + player_1_rect.width,
+                                         player_1_rect.y + player_1_rect.height//2 + 5, 10, 5)
+                    yellow_bullets.append(bullet)
+                    bullet_hit_shot.play()
 
                 # ------------Jugador 2 ------------------
                 if event.key == pygame.K_UP:
@@ -120,7 +133,11 @@ def game():
                 if event.key == pygame.K_RIGHT:
                     player2_speed_X = 3
                     flag_player_2 = 4
-                    
+                if event.key == pygame.K_RCTRL and len(red_bullets) < max_bullet:
+                    bullet = pygame.Rect(player_2_rect.x + player_2_rect.width,
+                                         player_2_rect.y + player_2_rect.height//2 + 5, 10, 5)
+                    red_bullets.append(bullet)
+                    bullet_hit_shot.play()
                 # if var is none do nothing but is !None assign a img
                 var_player_1, var_player_2 = util.move_player_1(
                     flag_player_1), util.move_player_2(flag_player_2),
@@ -207,13 +224,21 @@ def game():
         window_game.blit(player_1, (coord_player1_X, coord_player1_Y))
         window_game.blit(player_2, (coord_player2_X, coord_player2_Y))
 
-        pelota = pygame.draw.circle(
-            window_game, colour_white, (ball_X, ball_Y), 10)
+        # draw bullets
+        for bullet in red_bullets:
+            pygame.draw.rect(window_game, colour_red, bullet)
 
+        for bullet in yellow_bullets:
+            pygame.draw.rect(window_game, colour_yellow, bullet)
+        """ pelota = pygame.draw.circle(
+            window_game, colour_white, (ball_X, ball_Y), 10)
+        
         # Colisiones
         if pelota.colliderect(player_1_rect) or pelota.colliderect(player_2_rect):
-            ball_speed_X *= -1
-
+            ball_speed_X *= -1 """
+        util.handle_bullets_player_1(
+            yellow_bullets, player_2_rect, bullet_speed, red_hit, window_width)
+        util.handle_bullets_player_2(red_bullets,player_1_rect,bullet_speed,yellow_hit)
         # Actualiza la pantalla
         pygame.display.flip()
         clock.tick(60)

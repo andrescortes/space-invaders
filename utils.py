@@ -60,3 +60,26 @@ def move_player_2(flag):
         return player_2
     else:
         return None
+
+
+def handle_bullets_player_1(yellow_bullets, player_2_rect, bullet_speed, red_hit, window_width):
+    for bullet in yellow_bullets:
+        bullet.x += bullet_speed
+        if player_2_rect.colliderect(bullet):
+            pygame.event.post(pygame.event.Event(red_hit))
+            yellow_bullets.remove(bullet)
+
+        elif bullet.x > window_width:
+            yellow_bullets.remove(bullet)
+
+
+def handle_bullets_player_2(red_bullets, player_1_rect, bullet_speed, yellow_hit):
+
+    for bullet in red_bullets:
+        bullet.x -= bullet_speed
+        if player_1_rect.colliderect(bullet):
+            pygame.event.post(pygame.event.Event(yellow_hit))
+            red_bullets.remove(bullet)
+
+        elif bullet.x < 0:
+            red_bullets.remove(bullet)
