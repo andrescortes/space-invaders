@@ -5,7 +5,6 @@ import os
 # utils
 import utils as util
 
-
 def game():
     pygame.init()
     pygame.mixer.init()
@@ -71,17 +70,14 @@ def game():
     player_2 = pygame.image.load(
         util.load_img('ship_red', 'spaceship_red_left.png'))
 
-    # Coordenadas y velocidad del jugador 1
+    # Coordenadas y 3ocidad del jugador 1
     coord_player1_X = 50
     coord_player1_Y = 300 - 45
-    player1_speed_Y = 0
     player1_speed_X = 0
 
-    # Coordenadas y velocidad del jugador 2
+    # Coordenadas y 3ocidad del jugador 2
     coord_player2_X = 750 - player_width
     coord_player2_Y = 300 - 45
-    player2_speed_Y = 0
-    player2_speed_X = 0
 
     # Coordenadas de la pelota
     ball_X = 400
@@ -95,24 +91,23 @@ def game():
     movie = 1
 
     while not game_over:
+    
         for event in pygame.event.get():
+        
             if event.type == pygame.QUIT:
                 game_over = True
 
             # tecla presionada
             if event.type == pygame.KEYDOWN:
+                
                 # ------------Jugador 1-------------------
                 if event.key == pygame.K_w:
-                    player1_speed_Y = -3
                     flag_player_1 = 1
                 if event.key == pygame.K_s:
-                    player1_speed_Y = 3
                     flag_player_1 = 2
                 if event.key == pygame.K_a:
-                    player1_speed_X = -3
                     flag_player_1 = 3
                 if event.key == pygame.K_d:
-                    player1_speed_X = 3
                     flag_player_1 = 4
                 if event.key == pygame.K_LCTRL and len(yellow_bullets) < max_bullet:
                     bullet = pygame.Rect(player_1_rect.x + player_1_rect.width,
@@ -122,16 +117,12 @@ def game():
 
                 # ------------Jugador 2 ------------------
                 if event.key == pygame.K_UP:
-                    player2_speed_Y = -3
                     flag_player_2 = 1
                 if event.key == pygame.K_DOWN:
-                    player2_speed_Y = 3
                     flag_player_2 = 2
                 if event.key == pygame.K_LEFT:
-                    player2_speed_X = -3
                     flag_player_2 = 3
                 if event.key == pygame.K_RIGHT:
-                    player2_speed_X = 3
                     flag_player_2 = 4
                 if event.key == pygame.K_RCTRL and len(red_bullets) < max_bullet:
                     bullet = pygame.Rect(player_2_rect.x + player_2_rect.width,
@@ -145,30 +136,7 @@ def game():
                     player_1 = var_player_1
                 if(var_player_2):
                     player_2 = var_player_2
-
-            # key up = tecla soltada
-            if event.type == pygame.KEYUP:
-
-                # ---------------Jugador 1 ----------------
-                if event.key == pygame.K_w:
-                    player1_speed_Y = 0
-                if event.key == pygame.K_s:
-                    player1_speed_Y = 0
-                if event.key == pygame.K_a:
-                    player1_speed_X = 0
-                if event.key == pygame.K_d:
-                    player1_speed_X = 0
-
-                # ----------------Jugador 2 ---------------
-                if event.key == pygame.K_UP:
-                    player2_speed_Y = 0
-                if event.key == pygame.K_DOWN:
-                    player2_speed_Y = 0
-                if event.key == pygame.K_LEFT:
-                    player2_speed_X = 0
-                if event.key == pygame.K_RIGHT:
-                    player2_speed_X = 0
-
+                
         if ball_Y > 590 or ball_Y < 10:
             ball_speed_Y *= -1
 
@@ -190,13 +158,21 @@ def game():
 
         # Modifica las coordenadas para dar mov. a los jugadores/ pelota
         # suma posiciones en y para los dos jugadores
-
+        
+        
+        keys_pressed = pygame.key.get_pressed()
+        #if keys_pressed[pygame.K_UP] == True and  keys_pressed[pygame.K_w] == True
+        coord_player1_X = util.yellow_handle_movement(keys_pressed, coord_player1_X)
+        coord_player1_Y = util.yellow_handle_movement2(keys_pressed, coord_player1_Y)
+        coord_player2_X = util.red_handle_movement(keys_pressed, coord_player2_X)
+        coord_player2_Y = util.red_handle_movement2(keys_pressed, coord_player2_Y)
+        #print(coord_player1_Y)
         # player 1
-        coord_player1_Y += player1_speed_Y
-        coord_player1_X += player1_speed_X
+        #coord_player1_Y += player1_speed_Y
+        #coord_player1_X += player1_speed_X
         # player 2
-        coord_player2_Y += player2_speed_Y
-        coord_player2_X += player2_speed_X
+        #coord_player2_Y += player2_speed_Y
+        #coord_player2_X += player2_speed_X
 
         # Movimiento pelota
         ball_X += ball_speed_X
@@ -204,6 +180,7 @@ def game():
         # window_game.fill(colour_black)
 
         # Zona de dibujo
+        
         player_1_rect = pygame.draw.rect(
             window_game, colour_white, (coord_player1_X, coord_player1_Y, ship_width, ship_height))
         player_2_rect = pygame.draw.rect(
@@ -291,5 +268,6 @@ def help():
                     menu()
 
 
-start()
+#start()
 menu()
+#game()
