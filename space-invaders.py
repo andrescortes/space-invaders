@@ -1,9 +1,9 @@
 import pygame
-import time
 import os
-
+import time
 # utils
 import utils as util
+
 
 def game():
     pygame.init()
@@ -17,8 +17,6 @@ def game():
     # vars
     window_width = 800
     window_height = 600
-    player_width = 15
-    player_height = 90
 
     #size and clock
     window_game = pygame.display.set_mode((window_width, window_height))
@@ -36,7 +34,7 @@ def game():
     # font
     health_font = pygame.font.SysFont('comicsans', 40)
     winner_font = pygame.font.SysFont('comicsans', 100)
-    
+
     winner_font = pygame.font.SysFont('comicsans', 100)
     # health
     red_health = 10
@@ -45,8 +43,8 @@ def game():
     # fps
     fps = 60
     speed = 5
-    bullet_speed = 7
-    max_bullet = 3
+    bullet_speed = 15
+    max_bullet = 1
     ship_width, ship_height = 90, 70
     # user event
     yellow_hit = pygame.USEREVENT + 1
@@ -61,8 +59,8 @@ def game():
         util.load_img('img_project', 'space.png')), (window_width, window_height))
 
     # Estos rectángulos representan las spaceship
-    rect_ship_red = pygame.Rect(700, 300, ship_width, ship_height)
-    rect_ship_yellow = pygame.Rect(100, 300, ship_width, ship_height)
+    # rect_ship_red = pygame.Rect(700, 300, ship_width, ship_height)
+    # rect_ship_yellow = pygame.Rect(100, 300, ship_width, ship_height)
 
     # ships load image
     player_1 = pygame.image.load(
@@ -70,36 +68,27 @@ def game():
     player_2 = pygame.image.load(
         util.load_img('ship_red', 'spaceship_red_left.png'))
 
-    # Coordenadas y 3ocidad del jugador 1
-    coord_player1_X = 50
-    coord_player1_Y = 300 - 45
-    player1_speed_X = 0
+    # Coordenadas y velocidad del jugador 1
+    coord_player1_X = 30
+    coord_player1_Y = 250
 
-    # Coordenadas y 3ocidad del jugador 2
-    coord_player2_X = 750 - player_width
-    coord_player2_Y = 300 - 45
-
-    # Coordenadas de la pelota
-    ball_X = 400
-    ball_Y = 300
-    ball_speed_X = 3
-    ball_speed_Y = 3
+    # Coordenadas y velocidad del jugador 2
+    coord_player2_X = 680
+    coord_player2_Y = 250
 
     game_over = False
     flag_player_1 = 0
     flag_player_2 = 0
-    movie = 1
-
+    winner_text = ""
+    obstacles = []
+    start = time.time()
     while not game_over:
-    
         for event in pygame.event.get():
-        
             if event.type == pygame.QUIT:
                 game_over = True
 
             # tecla presionada
             if event.type == pygame.KEYDOWN:
-                
                 # ------------Jugador 1-------------------
                 if event.key == pygame.K_w:
                     flag_player_1 = 1
@@ -110,8 +99,8 @@ def game():
                 if event.key == pygame.K_d:
                     flag_player_1 = 4
                 if event.key == pygame.K_LCTRL and len(yellow_bullets) < max_bullet:
-                    bullet = pygame.Rect(player_1_rect.x + player_1_rect.width,
-                                         player_1_rect.y + player_1_rect.height//2 + 5, 10, 5)
+                    bullet = pygame.Rect(player_1_rect.x + player_1_rect.width + 10,
+                                         player_1_rect.y + player_1_rect.height//2 - 1, 20, 5)
                     yellow_bullets.append(bullet)
                     bullet_hit_shot.play()
 
@@ -125,8 +114,8 @@ def game():
                 if event.key == pygame.K_RIGHT:
                     flag_player_2 = 4
                 if event.key == pygame.K_RCTRL and len(red_bullets) < max_bullet:
-                    bullet = pygame.Rect(player_2_rect.x + player_2_rect.width,
-                                         player_2_rect.y + player_2_rect.height//2 + 5, 10, 5)
+                    bullet = pygame.Rect(player_2_rect.x + player_2_rect.width - 100,
+                                         player_2_rect.y + player_2_rect.height//2 - 1, 20, 5)
                     red_bullets.append(bullet)
                     bullet_hit_shot.play()
                 # if var is none do nothing but is !None assign a img
@@ -136,51 +125,46 @@ def game():
                     player_1 = var_player_1
                 if(var_player_2):
                     player_2 = var_player_2
-                
-        if ball_Y > 590 or ball_Y < 10:
-            ball_speed_Y *= -1
 
-        # Revisa si la pelota sale del lado derecho
-        if ball_X > 800:
-            ball_X = 400
-            ball_Y = 300
-            # Si sale de la pantalla, invierte direccion
-            ball_speed_X *= -1
-            ball_speed_Y *= -1
+            # impact discount life
+            if event.type == red_hit:
+                print("shot red")
+                red_health -= 1
+                bullet_hit_sound.play()
 
-        # Revisa si la pelota sale del lado izquierdo
-        if ball_X < 0:
-            ball_X = 400
-            ball_Y = 300
-            # Si sale de la pantalla, invierte direccion
-            ball_speed_X *= -1
-            ball_speed_Y *= -1
+            if event.type == yellow_hit:
+                print("shot yellow")
+                yellow_health -= 1
+                bullet_hit_sound.play()
+        # draw winner
+        if red_health <= 0:
+            winner_text = "Yellow Wins!"
 
-        # Modifica las coordenadas para dar mov. a los jugadores/ pelota
-        # suma posiciones en y para los dos jugadores
-        
-        
+        if yellow_health <= 0:
+            winner_text = "Red Wins!"
+
+        if winner_text != "":
+            util.draw_winner(winner_text, winner_font, window_width,
+                             window_height, colour_white, window_game)
+            break
+        # obstacles
+        now = time.time()
+        if now - start > 3:
+            obstacles.append(util.genObstacle())
+            start = now
+
         keys_pressed = pygame.key.get_pressed()
-        #if keys_pressed[pygame.K_UP] == True and  keys_pressed[pygame.K_w] == True
-        coord_player1_X = util.yellow_handle_movement(keys_pressed, coord_player1_X)
-        coord_player1_Y = util.yellow_handle_movement2(keys_pressed, coord_player1_Y)
-        coord_player2_X = util.red_handle_movement(keys_pressed, coord_player2_X)
-        coord_player2_Y = util.red_handle_movement2(keys_pressed, coord_player2_Y)
-        #print(coord_player1_Y)
-        # player 1
-        #coord_player1_Y += player1_speed_Y
-        #coord_player1_X += player1_speed_X
-        # player 2
-        #coord_player2_Y += player2_speed_Y
-        #coord_player2_X += player2_speed_X
-
-        # Movimiento pelota
-        ball_X += ball_speed_X
-        ball_Y += ball_speed_Y
-        # window_game.fill(colour_black)
+        # if keys_pressed[pygame.K_UP] == True and  keys_pressed[pygame.K_w] == True
+        coord_player1_X = util.yellow_handle_movement(
+            keys_pressed, coord_player1_X)
+        coord_player1_Y = util.yellow_handle_movement2(
+            keys_pressed, coord_player1_Y)
+        coord_player2_X = util.red_handle_movement(
+            keys_pressed, coord_player2_X)
+        coord_player2_Y = util.red_handle_movement2(
+            keys_pressed, coord_player2_Y)
 
         # Zona de dibujo
-        
         player_1_rect = pygame.draw.rect(
             window_game, colour_white, (coord_player1_X, coord_player1_Y, ship_width, ship_height))
         player_2_rect = pygame.draw.rect(
@@ -200,22 +184,42 @@ def game():
 
         window_game.blit(player_1, (coord_player1_X, coord_player1_Y))
         window_game.blit(player_2, (coord_player2_X, coord_player2_Y))
+        
+        # draw obstacles
+        for i in range(len(obstacles)):
+            print("obstacle origin: ", obstacles)
+            print()
+            print("obstacles-1: ",obstacles[i][0])
+            print("obstacles-2: ",(obstacles[i][2][0]))
+            print("obstacles-3: ",(obstacles[i][3][1]))
+            
+            
+            # remember, third item in list is position for top and
+            # fourth item is the position for bottom
 
+            # draw the obstacles
+            window_game.blit(
+                obstacles[i][0], (obstacles[i][2][0], obstacles[i][3][1]))
+            window_game.blit(
+                obstacles[i][1], (obstacles[i][2][0], obstacles[i][3][1]))
+            print("intermediate: ",obstacles[i][0], (obstacles[i][2][0], obstacles[i][3][1]))
+            print("intermediate-2: ",obstacles[i][1], (obstacles[i][2][0], obstacles[i][3][1]))
+            # change the x values for it to move to the right
+            obstacles[i][2][0] -= 1
+            obstacles[i][2][0] -= 1
+            print("obs-4: ",(obstacles[i][2][0]))
+            print()
         # draw bullets
         for bullet in red_bullets:
             pygame.draw.rect(window_game, colour_red, bullet)
 
         for bullet in yellow_bullets:
             pygame.draw.rect(window_game, colour_yellow, bullet)
-        """ pelota = pygame.draw.circle(
-            window_game, colour_white, (ball_X, ball_Y), 10)
-        
-        # Colisiones
-        if pelota.colliderect(player_1_rect) or pelota.colliderect(player_2_rect):
-            ball_speed_X *= -1 """
+        # handle bullets
         util.handle_bullets_player_1(
             yellow_bullets, player_2_rect, bullet_speed, red_hit, window_width)
-        util.handle_bullets_player_2(red_bullets,player_1_rect,bullet_speed,yellow_hit)
+        util.handle_bullets_player_2(
+            red_bullets, player_1_rect, bullet_speed, yellow_hit)
         # Actualiza la pantalla
         pygame.display.flip()
         clock.tick(60)
@@ -268,6 +272,6 @@ def help():
                     menu()
 
 
-#start()
+# start()
 menu()
-#game()
+# game()
