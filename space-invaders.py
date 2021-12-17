@@ -4,6 +4,16 @@ import time
 # utils
 import utils as util
 
+#button sounds
+pygame.init()
+pygame.mixer.init()
+help_sound_load = util.load_sound('help.wav')
+help_sound = pygame.mixer.Sound(help_sound_load)
+play_sound_load = util.load_sound('play.wav')
+play_sound = pygame.mixer.Sound(play_sound_load)
+exit_sound_load = util.load_sound('exit.wav')
+exit_sound = pygame.mixer.Sound(exit_sound_load)
+
 
 def game():
     pygame.init()
@@ -24,7 +34,7 @@ def game():
 
     # border screen
     border_screen = pygame.Rect(window_width//2 - 5, 0, 10, window_height)
-
+    
     # bullet sounds
     sound_grenade = util.load_sound('Grenade.wav')
     bullet_hit_sound = pygame.mixer.Sound(sound_grenade)
@@ -43,13 +53,12 @@ def game():
     # fps
     fps = 60
     speed = 5
-    bullet_speed = 15
-    max_bullet = 1
+    bullet_speed = 10
+    max_bullet = 3
     ship_width, ship_height = 90, 70
     # user event
     yellow_hit = pygame.USEREVENT + 1
     red_hit = pygame.USEREVENT + 2
-
     # bullets
     red_bullets = []
     yellow_bullets = []
@@ -82,6 +91,7 @@ def game():
     winner_text = ""
     obstacles = []
     start = time.time()
+    
     while not game_over:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -136,6 +146,7 @@ def game():
                 print("shot yellow")
                 yellow_health -= 1
                 bullet_hit_sound.play()
+            
         # draw winner
         if red_health <= 0:
             winner_text = "Yellow Wins!"
@@ -147,11 +158,6 @@ def game():
             util.draw_winner(winner_text, winner_font, window_width,
                              window_height, colour_white, window_game)
             break
-        # obstacles
-        now = time.time()
-        if now - start > 3:
-            obstacles.append(util.genObstacle())
-            start = now
 
         keys_pressed = pygame.key.get_pressed()
         # if keys_pressed[pygame.K_UP] == True and  keys_pressed[pygame.K_w] == True
@@ -185,30 +191,6 @@ def game():
         window_game.blit(player_1, (coord_player1_X, coord_player1_Y))
         window_game.blit(player_2, (coord_player2_X, coord_player2_Y))
         
-        # draw obstacles
-        for i in range(len(obstacles)):
-            print("obstacle origin: ", obstacles)
-            print()
-            print("obstacles-1: ",obstacles[i][0])
-            print("obstacles-2: ",(obstacles[i][2][0]))
-            print("obstacles-3: ",(obstacles[i][3][1]))
-            
-            
-            # remember, third item in list is position for top and
-            # fourth item is the position for bottom
-
-            # draw the obstacles
-            window_game.blit(
-                obstacles[i][0], (obstacles[i][2][0], obstacles[i][3][1]))
-            window_game.blit(
-                obstacles[i][1], (obstacles[i][2][0], obstacles[i][3][1]))
-            print("intermediate: ",obstacles[i][0], (obstacles[i][2][0], obstacles[i][3][1]))
-            print("intermediate-2: ",obstacles[i][1], (obstacles[i][2][0], obstacles[i][3][1]))
-            # change the x values for it to move to the right
-            obstacles[i][2][0] -= 1
-            obstacles[i][2][0] -= 1
-            print("obs-4: ",(obstacles[i][2][0]))
-            print()
         # draw bullets
         for bullet in red_bullets:
             pygame.draw.rect(window_game, colour_red, bullet)
@@ -230,48 +212,75 @@ def start():
     pygame.init()
     window = pygame.display.set_mode((800, 450))
     imgPresentation = pygame.image.load(
-        util.load_img('img_project', 'Presentacion.jpg'))
+        util.load_img('img_project', 'Init.png'))
     window.blit(imgPresentation, (0, 0))
     pygame.display.update()
     time.sleep(1)
 
-
-def menu():
+def play_again():
     pygame.init()
     window = pygame.display.set_mode((800, 450))
-    imgmenu = pygame.image.load(util.load_img('img_project', 'Menu.jpg'))
-    window.blit(imgmenu, (0, 0))
-    pygame.display.update()
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                x, y = event.pos
-                if(x >= 160 and y >= 152 and x <= 533 and y <= 228):
-                    game()
-                if(x >= 160 and y >= 236 and x <= 533 and y <= 314):
-                    help()
-                if(x >= 160 and y >= 322 and x <= 533 and y <= 397):
-                    exit()
-
-
-def help():
-    pygame.init()
-    window = pygame.display.set_mode((800, 450))
-    imgHelp = pygame.image.load(util.load_img('img_project', 'Ayuda.jpg'))
+    imgHelp = pygame.image.load(util.load_img('img_project', 'PlayAgain.png'))
     window.blit(imgHelp, (0, 0))
     pygame.display.update()
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                menu()
+                exit_sound.play()
+                exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
-                if(x >= 86 and y >= 394 and x <= 242 and y <= 433):
+                if(x >= 329 and y >= 211 and x <= 575 and y <= 299):
+                    play_sound.play()
+                    game()
+                if(x >= 290 and y >= 343 and x <= 510 and y <= 430):
+                    exit_sound.play()
+                    exit()
+    
+
+def menu():
+    pygame.init()
+    window = pygame.display.set_mode((800, 450))
+    imgmenu = pygame.image.load(util.load_img('img_project', 'Beginning.png'))
+    window.blit(imgmenu, (0, 0))
+    pygame.display.update()
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit_sound.play()
+                exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = event.pos
+                if(x >= 160 and y >= 152 and x <= 533 and y <= 228):
+                    play_sound.play()
+                    game()
+                    menu()
+                if(x >= 160 and y >= 236 and x <= 533 and y <= 314):
+                    help_sound.play()
+                    help()
+                if(x >= 160 and y >= 322 and x <= 533 and y <= 397):
+                    exit_sound.play()
+                    exit()
+            
+
+
+def help():
+    pygame.init()
+    window = pygame.display.set_mode((800, 450))
+    imgHelp = pygame.image.load(util.load_img('img_project', 'Help.png'))
+    window.blit(imgHelp, (0, 0))
+    pygame.display.update()
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit_sound.play()
+                exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = event.pos
+                if(x >= 567 and y >= 29 and x <= 736 and y <= 90):
+                    help_sound.play()
                     menu()
 
 
-# start()
+start()
 menu()
-# game()
