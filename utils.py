@@ -125,14 +125,31 @@ def draw_winner(text, winner_font, width, height, colour_white, window_game):
     pygame.time.delay(5000)
 
 
-def genObstacle():
-    # generate and return
-    # 1. pygame surface for top and bottom rects
-    # 2. initial position for top rect and bottom rect
-    topHeight = random.randint(10, 50)  # height for bottom obstacle
-    botHeight = random.randint(10, 50)  # height for top obstacle
-    top = pygame.Surface((10, topHeight)).convert()
-    bot = pygame.Surface((10, botHeight)).convert()
-    # return: top rect, bottom rect, top rect's position, bottom rect's position
-    return [top, bot, [800, 0], [random.randint(0, 600), random.randint(0, 600)]]
-    # return [top, bot, [800, 0], [800, 500-botHeight]]
+def check_collision(playerRect, obstacle):
+    # convert rectangles into x,y,w,h
+    playerX = playerRect[0]
+    playerY = playerRect[1]
+    playerWidth = playerRect[2]
+    playerHeight = playerRect[3]
+
+    obstacleX = obstacle[0]
+    obstacleY = obstacle[1]
+    obstacleWidth = obstacle[2]
+    obstacleHeight = obstacle[3]
+
+    # get the right left top and bottom
+    myRight = playerX + playerWidth
+    myLeft = playerX
+    myTop = playerY
+    myBottom = playerY + playerHeight
+
+    otherRight = obstacleX + obstacleWidth
+    otherLeft = obstacleX
+    otherTop = obstacleY
+    otherBottom = obstacleY + obstacleHeight
+
+    # now the collision code
+    collision = True
+    if ((myRight < otherLeft) or (myLeft > otherRight) or (myBottom < otherTop) or (myTop > otherBottom)):
+        collision = False
+    return collision

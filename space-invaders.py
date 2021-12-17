@@ -34,11 +34,11 @@ def game():
     # font
     health_font = pygame.font.SysFont('comicsans', 40)
     winner_font = pygame.font.SysFont('comicsans', 100)
-
     winner_font = pygame.font.SysFont('comicsans', 100)
+
     # health
-    red_health = 10
-    yellow_health = 10
+    red_health = 100
+    yellow_health = 100
 
     # fps
     fps = 60
@@ -46,6 +46,7 @@ def game():
     bullet_speed = 15
     max_bullet = 1
     ship_width, ship_height = 90, 70
+
     # user event
     yellow_hit = pygame.USEREVENT + 1
     red_hit = pygame.USEREVENT + 2
@@ -56,11 +57,7 @@ def game():
 
     # load background image
     backgroung_space = pygame.transform.scale(pygame.image.load(
-        util.load_img('img_project', 'space.png')), (window_width, window_height))
-
-    # Estos rectángulos representan las spaceship
-    # rect_ship_red = pygame.Rect(700, 300, ship_width, ship_height)
-    # rect_ship_yellow = pygame.Rect(100, 300, ship_width, ship_height)
+        util.load_img('img_project', 'space_2.png')), (window_width, window_height))
 
     # ships load image
     player_1 = pygame.image.load(
@@ -80,8 +77,18 @@ def game():
     flag_player_1 = 0
     flag_player_2 = 0
     winner_text = ""
-    obstacles = []
-    start = time.time()
+
+    # rectangles get declared with x, y, w, h
+    import random
+    obstacle = [0, 0, 25, 25]
+    obstacle_2 = [0, 0, 25, 25]
+    screen_padding = random.randint(0, 100)
+    # how fast to move obstalce down
+    obstacleMoveSpeed = 5
+    # variable indicate was the player collision
+    collision_player_1 = False
+    collision_player_2 = False
+    count = 0
     while not game_over:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -147,11 +154,41 @@ def game():
             util.draw_winner(winner_text, winner_font, window_width,
                              window_height, colour_white, window_game)
             break
-        # obstacles
-        now = time.time()
-        if now - start > 3:
-            obstacles.append(util.genObstacle())
-            start = now
+
+        # Zona de dibujo
+        player_1_rect = pygame.draw.rect(
+            window_game, colour_white, (coord_player1_X, coord_player1_Y, ship_width, ship_height))
+        player_2_rect = pygame.draw.rect(
+            window_game, colour_white, (coord_player2_X, coord_player2_Y, ship_width, ship_height))
+
+        # obstacles player_1
+        # move obstacle downward
+        obstacle[1] = obstacle[1] + obstacleMoveSpeed
+        if (util.check_collision(player_1_rect, obstacle)):
+            yellow_health -= 1
+            bullet_hit_sound.play()
+        if obstacle[1] > window_height + screen_padding:
+            obstacle[1] = -50
+            screen_padding = random.randint(0, 100)
+            orientation = bool(random.getrandbits(1))
+            if orientation:
+                obstacle[0] = random.randint(0, 200)
+            else:
+                obstacle[0] = random.randint(200, 400)
+
+        # obstacle player 2
+        obstacle_2[1] = obstacle_2[1] + obstacleMoveSpeed
+        if (util.check_collision(player_2_rect, obstacle_2)):
+            red_health -= 1
+            bullet_hit_sound.play()
+        if obstacle_2[1] > window_height + screen_padding:
+            obstacle_2[1] = -50
+            screen_padding = random.randint(0, 100)
+            orientation = bool(random.getrandbits(1))
+            if orientation:
+                obstacle_2[0] = random.randint(400, 600)
+            else:
+                obstacle_2[0] = random.randint(600, 800)
 
         keys_pressed = pygame.key.get_pressed()
         # if keys_pressed[pygame.K_UP] == True and  keys_pressed[pygame.K_w] == True
@@ -163,12 +200,6 @@ def game():
             keys_pressed, coord_player2_X)
         coord_player2_Y = util.red_handle_movement2(
             keys_pressed, coord_player2_Y)
-
-        # Zona de dibujo
-        player_1_rect = pygame.draw.rect(
-            window_game, colour_white, (coord_player1_X, coord_player1_Y, ship_width, ship_height))
-        player_2_rect = pygame.draw.rect(
-            window_game, colour_white, (coord_player2_X, coord_player2_Y, ship_width, ship_height))
 
         window_game.blit(backgroung_space, (0, 0))
         pygame.draw.rect(window_game, colour_black, border_screen)
@@ -184,42 +215,24 @@ def game():
 
         window_game.blit(player_1, (coord_player1_X, coord_player1_Y))
         window_game.blit(player_2, (coord_player2_X, coord_player2_Y))
-        
-        # draw obstacles
-        for i in range(len(obstacles)):
-            print("obstacle origin: ", obstacles)
-            print()
-            print("obstacles-1: ",obstacles[i][0])
-            print("obstacles-2: ",(obstacles[i][2][0]))
-            print("obstacles-3: ",(obstacles[i][3][1]))
-            
-            
-            # remember, third item in list is position for top and
-            # fourth item is the position for bottom
 
-            # draw the obstacles
-            window_game.blit(
-                obstacles[i][0], (obstacles[i][2][0], obstacles[i][3][1]))
-            window_game.blit(
-                obstacles[i][1], (obstacles[i][2][0], obstacles[i][3][1]))
-            print("intermediate: ",obstacles[i][0], (obstacles[i][2][0], obstacles[i][3][1]))
-            print("intermediate-2: ",obstacles[i][1], (obstacles[i][2][0], obstacles[i][3][1]))
-            # change the x values for it to move to the right
-            obstacles[i][2][0] -= 1
-            obstacles[i][2][0] -= 1
-            print("obs-4: ",(obstacles[i][2][0]))
-            print()
+        # draw obstacle
+        pygame.draw.rect(window_game, colour_yellow, obstacle)
+        pygame.draw.rect(window_game, colour_red, obstacle_2)
+
         # draw bullets
         for bullet in red_bullets:
             pygame.draw.rect(window_game, colour_red, bullet)
 
         for bullet in yellow_bullets:
             pygame.draw.rect(window_game, colour_yellow, bullet)
+
         # handle bullets
         util.handle_bullets_player_1(
             yellow_bullets, player_2_rect, bullet_speed, red_hit, window_width)
         util.handle_bullets_player_2(
             red_bullets, player_1_rect, bullet_speed, yellow_hit)
+
         # Actualiza la pantalla
         pygame.display.flip()
         clock.tick(60)
@@ -233,7 +246,7 @@ def start():
         util.load_img('img_project', 'Presentacion.jpg'))
     window.blit(imgPresentation, (0, 0))
     pygame.display.update()
-    time.sleep(1)
+    time.sleep(5)
 
 
 def menu():
@@ -272,6 +285,5 @@ def help():
                     menu()
 
 
-# start()
+start()
 menu()
-# game()
